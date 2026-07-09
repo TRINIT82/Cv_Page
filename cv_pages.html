@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Automation / AI Integrator</title>
+<meta name="description" content="AI Automation & AI Integrator portfolio — n8n, Google Gemini API, FastAPI, self-hosted infrastructure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0E16;
+    --bg-2: #10151F;
+    --surface: #161B26;
+    --line: #232A38;
+    --red: #007519;
+    --red-dim: #007554;
+    --blue: #4A90D9;
+    --text: #EDEDED;
+    --text-muted: #8A93A3;
+    --display: 'Bebas Neue', sans-serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 15% 0%, rgba(94, 254, 203, 0.223), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 85% 30%, rgba(74,144,217,0.06), transparent 60%);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  a { color: inherit; }
+  ::selection { background: var(--red); color: #fff; }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(10, 14, 22, 0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nav-pills { display: flex; gap: 8px; }
+  .nav-pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted);
+    border: 1px solid var(--line);
+    padding: 7px 14px;
+    border-radius: 20px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .nav-pill:hover { border-color: var(--blue); color: var(--text); }
+  .nav-pill.hi { border-color: var(--blue); color: var(--blue); background: rgba(74,144,217,0.08); }
+
+  .lang-toggle {
+    display: flex;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px;
+  }
+  .lang-toggle button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    transition: background 0.15s, color 0.15s;
+  }
+  .lang-toggle button.active { background: var(--red); color: #fff; }
+
+  /* HERO — cover screen */
+  .hero {
+    min-height: 78vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 0 50px;
+    position: relative;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    width: fit-content;
+  }
+  .chip::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--red);
+  }
+
+  .hero-row {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    flex-wrap: wrap;
+  }
+
+  .accent-badge {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--red) 0%, var(--red-dim) 55%, transparent 78%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .accent-badge svg { width: 62px; height: 62px; }
+
+  h1.title {
+    font-family: var(--display);
+    font-size: clamp(52px, 11vw, 104px);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .title-year {
+    font-family: var(--display);
+    color: var(--text-muted);
+    font-size: clamp(24px, 4vw, 36px);
+    margin-left: 4px;
+  }
+
+  .hero-role {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 18px;
+    max-width: 520px;
+  }
+  .hero-role strong { color: var(--text); }
+
+  .menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 40px;
+    font-family: var(--display);
+    letter-spacing: 0.08em;
+  }
+  .menu-links a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    text-transform: uppercase;
+    transition: color 0.15s, padding-left 0.15s;
+    width: fit-content;
+  }
+  .menu-links a:hover { color: var(--text); padding-left: 10px; }
+  .menu-links a::before { content: '▸ '; color: var(--red); opacity: 0; transition: opacity 0.15s; }
+  .menu-links a:hover::before { opacity: 1; }
+
+  /* SECTIONS */
+  section { padding: 70px 0; border-top: 1px solid var(--line); }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  h2.sec-title {
+    font-family: var(--display);
+    font-size: clamp(30px, 5vw, 44px);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .sec-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    border: 1px solid var(--red-dim);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 40px;
+  }
+  @media (max-width: 640px) {
+    .about-grid { grid-template-columns: 1fr; }
+  }
+  .about-portrait {
+    width: 100%;
+    aspect-ratio: 3/4;
+    border-radius: 12px;
+    background:
+      linear-gradient(160deg, var(--red) 0%, var(--red-dim) 45%, var(--bg-2) 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 16px;
+  }
+  .about-portrait svg { position: absolute; top: 20px; left: 20px; width: 46px; height: 46px; opacity: 0.9; }
+  .about-portrait .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.05em;
+  }
+
+  .about-text { color: var(--text-muted); font-size: 15.5px; max-width: 560px; margin-bottom: 30px; }
+  .about-text strong { color: var(--text); }
+
+  .block-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+
+  .icon-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 32px; }
+  .icon-badge {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+  }
+  .icon-badge .tip {
+    position: absolute;
+    top: 48px;
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .icon-badge:hover .tip { opacity: 1; }
+
+  .info-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 560px) { .info-cols { grid-template-columns: 1fr; } }
+  .info-cols h4 {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+  .info-cols p { font-size: 14px; color: var(--text-muted); }
+  .info-cols p strong { color: var(--text); display: block; margin-bottom: 2px; }
+
+  /* PROJECTS GRID */
+  .proj-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 720px) { .proj-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 460px) { .proj-grid { grid-template-columns: 1fr; } }
+
+  .proj-tile {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .proj-tile:hover { border-color: var(--red); transform: translateY(-3px); }
+  .proj-num { font-family: var(--display); font-size: 34px; color: var(--red-dim); line-height: 1; }
+  .proj-name { font-family: var(--mono); font-weight: 700; font-size: 14px; margin-top: 14px; }
+  .proj-stack { font-family: var(--mono); font-size: 10.5px; color: var(--blue); margin-top: 6px; }
+  .proj-desc { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; }
+
+  /* EDUCATION */
+  .edu-line { color: var(--text-muted); font-size: 15px; }
+  .edu-line strong { color: var(--text); }
+
+  /* CONTACT / THANK YOU */
+  .contact-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+  .contact-cards { display: flex; flex-direction: column; gap: 10px; }
+  .contact-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .contact-card .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red);
+  }
+  .contact-card:hover { color: var(--blue); }
+
+  .thankyou {
+    font-family: var(--display);
+    font-size: clamp(38px, 8vw, 70px);
+    line-height: 0.95;
+    text-align: right;
+    text-transform: uppercase;
+  }
+  .thankyou .yr { color: var(--red); }
+
+  footer {
+    padding: 28px 0 48px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-pills">
+      <a class="nav-pill" href="#about" data-i18n="nav-about">Profile</a>
+      <a class="nav-pill" href="#projects" data-i18n="nav-projects">Project</a>
+      <a class="nav-pill" href="#contact" data-i18n="nav-contact">Contact</a>
+    </div>
+    <div class="lang-toggle">
+      <button id="btn-ua" class="active" onclick="setLang('ua')">UA</button>
+      <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- HERO / COVER -->
+  <section class="hero" style="border-top:none;">
+    <div class="chip" data-i18n="chip">AI Automation / AI Integrator</div>
+
+    <div class="hero-row">
+      <div class="accent-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+      </div>
+      <div>
+        <h1 class="title">Artem<br>Horodianko <span class="title-year">2026</span></h1>
+      </div>
+    </div>
+
+    <p class="hero-role" data-i18n="hero-role">Проєктую та будую <strong>end-to-end AI-workflow</strong> — від LLM-ботів до self-hosted інфраструктури, яка їх запускає.</p>
+
+   
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="sec-head">
+      <h2 class="sec-title" data-i18n="about-title">Про мене</h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-portrait">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span class="tag" data-i18n="portrait-tag">// builder</span>
+      </div>
+
+      <div>
+        <p class="about-text" data-i18n="about-text">
+          Студент 2-го курсу спеціальності «Комп'ютерні науки». Проєктую та будую AI-automation workflow на
+          <strong>n8n</strong> з інтеграцією <strong>Google Gemini API</strong>, а також вмію обгортати AI-логіку
+          у власний backend (<strong>Python / FastAPI / SQLAlchemy</strong>). Захоплююсь DevOps та побудовою
+          власних серверних рішень з нуля.
+        </p>
+
+        <div class="block-label" data-i18n="stack-label">Стек</div>
+        <div class="icon-row">
+          <div class="icon-badge" style="background:#3776AB;">PY<span class="tip">Python</span></div>
+          <div class="icon-badge" style="background:#0B8457;">FA<span class="tip">FastAPI</span></div>
+          <div class="icon-badge" style="background:#EA4B71;">n8<span class="tip">n8n</span></div>
+          <div class="icon-badge" style="background:#8E44AD;">GM<span class="tip">Gemini API</span></div>
+          <div class="icon-badge" style="background:#26A5E4;">TG<span class="tip">Telegram Bot API</span></div>
+          <div class="icon-badge" style="background:#2496ED;">DK<span class="tip">Docker</span></div>
+        </div>
+
+        <div class="info-cols">
+          <div>
+            <h4 data-i18n="edu-h">Education</h4>
+            <p><strong>2024 — 2026</strong><span data-i18n="edu-p">Кременчуцька гуманітарно-технологічна академія, Комп'ютерні науки (122)</span></p>
+          </div>
+          <div>
+            <h4 data-i18n="exp-h">Focus</h4>
+            <p><strong data-i18n="exp-p1">AI Automation & Integration</strong><span data-i18n="exp-p2">n8n workflows · LLM integration · self-hosted infra</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="sec-head">
+      <h2 class="sec-title" data-i18n="projects-title">Проєкти</h2>
+    </div>
+
+    <div class="proj-grid">
+      <div class="proj-tile">
+        <div>
+          <div class="proj-num">01</div>
+          <div class="proj-name" data-i18n="p1-title">Telegram-бот з Gemini AI</div>
+          <div class="proj-stack">n8n · Gemini API · OAuth 2.0</div>
+        </div>
+        <div class="proj-desc" data-i18n="p1-desc">AI-бот відповідає на питання про завдання Google Classroom через LLM.</div>
+      </div>
+
+      <div class="proj-tile">
+        <div>
+          <div class="proj-num">02</div>
+          <div class="proj-name" data-i18n="p2-title">Homelab на Raspberry Pi 5</div>
+          <div class="proj-stack">n8n · Docker · Cloudflare Tunnel</div>
+        </div>
+        <div class="proj-desc" data-i18n="p2-desc">Self-hosted сервер з власним доменом, HTTPS та моніторингом через Telegram.</div>
+      </div>
+
+      <div class="proj-tile">
+        <div>
+          <div class="proj-num">03</div>
+          <div class="proj-name" data-i18n="p3-title">Система турнірів</div>
+          <div class="proj-stack">FastAPI · MySQL · SQLAlchemy</div>
+        </div>
+        <div class="proj-desc" data-i18n="p3-desc">Full-stack застосунок з рольовим доступом, лідербордом та REST API.</div>
+      </div>
+
+    <div class="proj-tile">
+        <div>
+          <div class="proj-num">04</div>
+          <div class="proj-name" data-i18n="p4-title">AutoGForm - автоматизація заявок</div>
+          <div class="proj-stack">n8n · Google Sheets API · Telegram Bot API</div>
+        </div>
+        <div class="proj-desc" data-i18n="p4-desc">Форма → класифікація → сповіщення → трекінг статусу. Час реакції: 15–30 хв → &lt;1 хв.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKFLOW DEMO — вставити після </div> проєктної сітки, перед </section> -->
+<div style="margin-top: 46px;">
+  <div class="block-label" data-i18n="workflow-label">Один з простих Workflow</div>
+
+  <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 30px 16px 24px; overflow-x: auto;">
+    <svg viewBox="0 0 1040 400" width="100%" style="min-width: 720px; max-width: 1040px; display:block; margin: 0 auto;" role="img" aria-label="n8n workflow: Telegram Trigger, Edit Fields, AI Agent з Gemini Chat Model, Simple Memory, HTTP Docs та HTTP Classroom tools, Code in JavaScript, Send a text message">
+
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-muted)"/>
+        </marker>
+      </defs>
+
+      <!-- main row connectors -->
+      <line x1="150" y1="70" x2="228" y2="70" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="358" y1="70" x2="428" y2="70" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="648" y1="70" x2="718" y2="70" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="848" y1="70" x2="918" y2="70" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <!-- dashed branch connectors from AI Agent -->
+      <path d="M 500 105 L 500 150 L 400 150 L 400 195" fill="none" stroke="var(--line)" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <path d="M 500 105 L 500 195" fill="none" stroke="var(--line)" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <path d="M 500 105 L 500 150 L 610 150 L 610 195" fill="none" stroke="var(--line)" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <path d="M 610 235 L 560 260 L 560 295" fill="none" stroke="var(--line)" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <path d="M 610 235 L 680 260 L 680 295" fill="none" stroke="var(--line)" stroke-width="1.3" stroke-dasharray="3 3"/>
+
+      <!-- diamond connector markers -->
+      <rect x="394" y="189" width="12" height="12" transform="rotate(45 400 195)" fill="var(--bg-2)" stroke="var(--text-muted)" stroke-width="1.3"/>
+      <rect x="494" y="189" width="12" height="12" transform="rotate(45 500 195)" fill="var(--bg-2)" stroke="var(--text-muted)" stroke-width="1.3"/>
+      <rect x="604" y="189" width="12" height="12" transform="rotate(45 610 195)" fill="var(--bg-2)" stroke="var(--text-muted)" stroke-width="1.3"/>
+
+      <text x="400" y="182" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text-muted)">Chat Model</text>
+      <text x="500" y="182" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text-muted)">Memory</text>
+      <text x="610" y="182" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text-muted)">Tool</text>
+
+      <!-- 1. Telegram Trigger -->
+      <rect x="20" y="35" width="130" height="70" rx="14" fill="var(--bg-2)" stroke="#3AAE4A" stroke-width="1.5"/>
+      <circle cx="55" cy="70" r="15" fill="#26A5E4"/>
+      <path d="M 49 70 L 60 65 L 56 76 L 53 71 z" fill="#fff"/>
+      <text x="20" y="122" font-family="var(--mono)" font-size="11" fill="var(--text)" font-weight="600">Telegram Trigger</text>
+      <text x="20" y="135" font-family="var(--mono)" font-size="9" fill="var(--text-muted)">Updates: message</text>
+
+      <!-- 2. Edit Fields -->
+      <rect x="228" y="35" width="130" height="70" rx="14" fill="var(--bg-2)" stroke="#3AAE4A" stroke-width="1.5"/>
+      <circle cx="263" cy="70" r="15" fill="var(--surface)" stroke="#3AAE4A" stroke-width="1.3"/>
+      <path d="M 257 76 L 260 66 L 270 63 L 267 73 z" fill="none" stroke="#3AAE4A" stroke-width="1.4"/>
+      <text x="228" y="122" font-family="var(--mono)" font-size="11" fill="var(--text)" font-weight="600">Edit Fields</text>
+      <text x="228" y="135" font-family="var(--mono)" font-size="9" fill="var(--text-muted)">manual</text>
+
+      <!-- 3. AI Agent -->
+      <rect x="428" y="30" width="180" height="80" rx="14" fill="var(--bg-2)" stroke="var(--red)" stroke-width="1.6"/>
+      <circle cx="470" cy="70" r="17" fill="var(--surface)" stroke="var(--text)" stroke-width="1.4"/>
+      <rect x="461" y="63" width="18" height="13" rx="3" fill="none" stroke="var(--text)" stroke-width="1.3"/>
+      <circle cx="466" cy="69" r="1.6" fill="var(--text)"/>
+      <circle cx="474" cy="69" r="1.6" fill="var(--text)"/>
+      <text x="498" y="75" font-family="var(--mono)" font-size="13" fill="var(--text)" font-weight="700">AI Agent</text>
+      <text x="428" y="127" font-family="var(--mono)" font-size="11" fill="var(--text)" font-weight="600"></text>
+
+      <!-- 4. Code in JavaScript -->
+      <rect x="718" y="35" width="130" height="70" rx="14" fill="var(--bg-2)" stroke="var(--line)" stroke-width="1.5"/>
+      <text x="753" y="76" font-family="var(--mono)" font-size="20" fill="#E8A33D" font-weight="700">{ }</text>
+      <text x="718" y="122" font-family="var(--mono)" font-size="11" fill="var(--text)" font-weight="600">Code in JS</text>
+
+      <!-- 5. Send a text message -->
+      <rect x="918" y="35" width="100" height="70" rx="14" fill="var(--bg-2)" stroke="var(--line)" stroke-width="1.5"/>
+      <circle cx="953" cy="70" r="15" fill="#26A5E4"/>
+      <path d="M 947 70 L 958 65 L 954 76 L 951 71 z" fill="#fff"/>
+      <text x="918" y="122" font-family="var(--mono)" font-size="10" fill="var(--text)" font-weight="600">Send message</text>
+
+      <!-- branch: Google Gemini Chat Model -->
+      <circle cx="400" cy="225" r="30" fill="var(--bg-2)" stroke="var(--red)" stroke-width="1.5"/>
+      <text x="400" y="230" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="#4285F4" font-weight="700">G</text>
+      <text x="400" y="270" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text)">Gemini Chat</text>
+
+      <!-- branch: Simple Memory -->
+      <circle cx="500" cy="225" r="30" fill="var(--bg-2)" stroke="#3AAE4A" stroke-width="1.5"/>
+      <rect x="490" y="216" width="20" height="18" rx="2" fill="none" stroke="#3AAE4A" stroke-width="1.3"/>
+      <line x1="490" y1="222" x2="510" y2="222" stroke="#3AAE4A" stroke-width="1"/>
+      <line x1="490" y1="228" x2="510" y2="228" stroke="#3AAE4A" stroke-width="1"/>
+      <text x="500" y="270" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text)">Simple Memory</text>
+
+      <!-- Tool plus node -->
+      <circle cx="610" cy="225" r="16" fill="var(--bg-2)" stroke="var(--line)" stroke-width="1.3"/>
+      <text x="610" y="230" text-anchor="middle" font-family="var(--mono)" font-size="14" fill="var(--text-muted)">+</text>
+
+      <!-- branch: HTTP Docs -->
+      <circle cx="560" cy="325" r="28" fill="var(--bg-2)" stroke="var(--line)" stroke-width="1.5"/>
+      <circle cx="560" cy="325" r="12" fill="none" stroke="#5EC8D8" stroke-width="1.4"/>
+      <line x1="548" y1="325" x2="572" y2="325" stroke="#5EC8D8" stroke-width="1.1"/>
+      <text x="560" y="368" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text)">HTTP Docs</text>
+
+      <!-- branch: HTTP Classroom -->
+      <circle cx="680" cy="325" r="28" fill="var(--bg-2)" stroke="var(--line)" stroke-width="1.5"/>
+      <circle cx="680" cy="325" r="12" fill="none" stroke="#5EC8D8" stroke-width="1.4"/>
+      <line x1="668" y1="325" x2="692" y2="325" stroke="#5EC8D8" stroke-width="1.1"/>
+      <text x="680" y="368" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--text)">HTTP Classroom</text>
+
+    </svg>
+  </div>
+
+  <p style="font-family: var(--mono); font-size: 11.5px; color: var(--text-muted); margin-top: 14px; max-width: 640px;" data-i18n="workflow-caption">
+    Telegram Trigger приймає повідомлення → Edit Fields нормалізує дані → AI Agent (Gemini Chat Model + Simple Memory + HTTP-інструменти для Google Docs/Classroom) формує відповідь → Code in JavaScript обробляє результат → бот надсилає відповідь назад у Telegram.
+  </p>
+</div>
+
+  <!-- CONTACT / THANK YOU -->
+  <section id="contact">
+    <div class="sec-head">
+      <h2 class="sec-title" data-i18n="contact-title">Контакти</h2>
+    </div>
+
+    <div class="contact-flex">
+      <div class="contact-cards">
+        <a class="contact-card" href="mailto:TRINTIS@protonmail.com"><span class="dot"></span>TRINTIS@protonmail.com</a>
+        <a class="contact-card" href="https://t.me/TRINIT_83"><span class="dot"></span>@TRINIT_83 (Telegram)</a>
+        <a class="contact-card" href="https://github.com/TRINIT82"><span class="dot"></span>Ray (GitHub)</a>
+      </div>
+      <div class="thankyou" data-i18n="thankyou">Thank<br>You <span class="yr">2026</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span data-i18n="footer-text">Городянко Артем · Україна</span>
+  </footer>
+
+</div>
+
+<script>
+const translations = {
+  ua: {
+    'nav-about': 'Профіль', 'nav-projects': 'Проєкт', 'nav-contact': 'Контакти',
+    'chip': 'AI Automation / AI Integrator',
+    'hero-role': 'Проєктую та будую <strong>end-to-end AI-workflow</strong> - від LLM-ботів до self-hosted інфраструктури, яка їх запускає.',
+    'menu-about': 'Про мене', 'menu-projects': 'Проєкти', 'menu-contact': 'Контакти',
+    'about-title': 'Про мене', 'about-tag': 'профіль',
+    'portrait-tag': '// builder',
+    'about-text': 'Студент 3-го курсу спеціальності «Комп\'ютерні науки». Проєктую та будую AI-automation workflow на <strong>n8n</strong> з інтеграцією <strong>Google Gemini API</strong>. Захоплююсь DevOps та побудовою власних серверних рішень з нуля.',
+    'stack-label': 'Стек',
+    'edu-h': 'Освіта', 'edu-p': 'Комп\'ютерні науки',
+    'exp-h': 'Фокус', 'exp-p1': 'AI Automation & Integration', 'exp-p2': 'n8n workflows · LLM integration · self-hosted infra',
+    'projects-title': 'Проєкти', 'projects-tag': 'recap 2026',
+    'p1-title': 'Telegram-бот з Gemini AI', 'p1-desc': 'AI-бот відповідає на питання про завдання Google Classroom через LLM.',
+    'p2-title': 'Homelab на Raspberry Pi 5', 'p2-desc': 'Self-hosted сервер з власним доменом, HTTPS та моніторингом через Telegram.',
+    'p3-title': 'Система турнірів', 'p3-desc': 'Full-stack застосунок з рольовим доступом, лідербордом та REST API.',
+    'p4-title': 'AutoGForm — автоматизація заявок',
+    'p4-desc': 'Форма → класифікація → сповіщення → трекінг статусу. Час реакції: 15–30 хв → <1 хв.',
+    'contact-title': 'Контакти', 'contact-tag': 'на зв\'язку',
+    'thankyou': '<span class="yr">2026</span>',
+    'footer-text': 'Городянко Артем · Кременчук, Україна',
+    'workflow-label': 'Один з простих Workflow',
+    'workflow-caption': 'Telegram Trigger приймає повідомлення → Edit Fields нормалізує дані → AI Agent (на базі Gemini, з пам\'яттю розмови та HTTP-інструментами до Classroom API) формує відповідь → Code обробляє результат → бот надсилає повідомлення користувачу.',
+  },
+  en: {
+    'nav-about': 'Profile', 'nav-projects': 'Project', 'nav-contact': 'Contact',
+    'chip': 'AI Automation / AI Integrator',
+    'hero-role': 'Designing and building <strong>end-to-end AI workflows</strong> — from LLM-powered bots to the self-hosted infrastructure that runs them.',
+    'menu-about': 'About', 'menu-projects': 'Projects', 'menu-contact': 'Contact',
+    'about-title': 'About', 'about-tag': 'profile',
+    'portrait-tag': '// builder',
+    'about-text': '3rd-year Computer Science student. I build AI automation workflows in <strong>n8n</strong> integrated with the <strong>Google Gemini API</strong>. Into DevOps and building my own server infrastructure from scratch.',
+    'stack-label': 'Stack',
+    'edu-h': 'Education', 'edu-p': 'Computer Science',
+    'exp-h': 'Focus', 'exp-p1': 'AI Automation & Integration', 'exp-p2': 'n8n workflows · LLM integration · self-hosted infra',
+    'projects-title': 'Projects', 'projects-tag': 'recap 2026',
+    'p1-title': 'Telegram Bot with Gemini AI', 'p1-desc': 'AI bot answers Google Classroom assignment questions via an LLM.',
+    'p2-title': 'Homelab on Raspberry Pi 5', 'p2-desc': 'Self-hosted server with a custom domain, HTTPS and Telegram-based monitoring.',
+    'p3-title': 'Tournament System', 'p3-desc': 'Full-stack app with role-based access, leaderboard and REST API.',
+    'p4-title': 'AutoGForm — request automation',
+    'p4-desc': 'Form → classification → notification → status tracking. Response time: 15–30 min → <1 min.',
+    'contact-title': 'Contact', 'contact-tag': 'get in touch',
+    'thankyou': '<span class="yr">2026</span>',
+    'footer-text': 'Artem Horodianko · Kremenchuk, Ukraine',
+    'workflow-label': 'One of the simple Workflows',
+    'workflow-caption': 'Telegram Trigger receives the message → Edit Fields normalizes data → AI Agent (Gemini-based, with conversation memory and HTTP tools to the Classroom API) generates a response → Code processes the result → the bot sends a reply to the user.'
+  }
+};
+
+function setLang(lang) {
+  document.documentElement.lang = lang;
+  document.getElementById('btn-ua').classList.toggle('active', lang === 'ua');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) el.innerHTML = translations[lang][key];
+  });
+  localStorage.setItem('lang', lang);
+}
+
+(function initLang() {
+  const saved = localStorage.getItem('lang') || 'ua';
+  setLang(saved);
+})();
+
+const sections = ['about', 'projects', 'contact'];
+const navLinks = { about: document.getElementById('nav-about'), projects: document.getElementById('nav-projects'), contact: document.getElementById('nav-contact') };
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      Object.values(navLinks).forEach(link => link.classList.remove('hi'));
+      navLinks[entry.target.id].classList.add('hi');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+
+sections.forEach(id => observer.observe(document.getElementById(id)));
+
+</script>
+
+</body>
+</html>
